@@ -65,6 +65,22 @@ services:
     networks:
       - nesto-network
 
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: nesto-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: nesto_user
+      PMA_PASSWORD: 1234
+    depends_on:
+      - mysql
+    networks:
+      - nesto-network
+
 networks:
   nesto-network:
     driver: bridge
