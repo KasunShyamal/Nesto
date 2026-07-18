@@ -45,8 +45,6 @@ services:
     image: redis:7-alpine
     container_name: nesto-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     networks:
       - nesto-network
 
