@@ -1,0 +1,76 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nesto-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    networks:
+      - nesto-network
+
+  webserver:
+    image: nginx:1.27-alpine
+    container_name: nesto-webserver
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d
+    networks:
+      - nesto-network
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: nesto-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: nesto_loyalty
+      MYSQL_ROOT_PASSWORD: rootsecret
+      MYSQL_USER: nesto_user
+      MYSQL_PASSWORD: 1234
+    volumes:
+      - nesto-db-data:/var/lib/mysql
+    networks:
+      - nesto-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: nesto-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - nesto-network
+
+  queue-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nesto-queue-worker
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    command: php artisan queue:work redis --sleep=3 --tries=3
+    depends_on:
+      - app
+      - redis
+      - mysql
+    networks:
+      - nesto-network
+
+networks:
+  nesto-network:
+    driver: bridge
+
+volumes:
+  nesto-db-data:
+    driver: local
