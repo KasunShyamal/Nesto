@@ -13,7 +13,7 @@
 
 ## Quick Start & Run (Docker Containerized)
 
-Ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
+Ensure [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
 
 ### Windows (One-Click Setup)
 Double-click on the **`start.bat`** script in the project root. This automates:
