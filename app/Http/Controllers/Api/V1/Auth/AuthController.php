@@ -38,6 +38,8 @@ class AuthController extends Controller
         // 3. Issue token with role as ability
         $token = $user->createToken('auth_token', [$user->role])->plainTextToken;
 
+        $user->load('customer.registeredBy');
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',

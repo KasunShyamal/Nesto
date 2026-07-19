@@ -34,6 +34,6 @@ class EloquentCustomerRepository implements CustomerRepositoryInterface
     // get all customers paginated
     public function getPaginated(int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        return Customer::latest()->paginate($perPage);
+        return Customer::with('registeredBy')->latest()->paginate($perPage);
     }
 }

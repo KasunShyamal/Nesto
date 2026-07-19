@@ -24,7 +24,7 @@ class ActivationController extends Controller
 
         return response()->json([
             'message' => 'Account activated successfully. You can now log in.',
-            'customer' => new CustomerResource($customer),
+            'customer' => new CustomerResource($customer->load('registeredBy')),
         ]);
     }
 }

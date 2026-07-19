@@ -42,7 +42,7 @@ class CustomerController extends Controller
 
         return response()->json([
             'message' => 'Customer registered successfully. Profile is pending activation.',
-            'customer' => new CustomerResource($customer),
+            'customer' => new CustomerResource($customer->load('registeredBy')),
         ], 201);
     }
 
@@ -56,6 +56,8 @@ class CustomerController extends Controller
                 'message' => 'No customer profile associated with this user.'
             ], 404);
         }
+
+        $customer->load('registeredBy');
 
         return response()->json([
             'customer' => new CustomerResource($customer)
