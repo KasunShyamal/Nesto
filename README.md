@@ -1,12 +1,6 @@
-# Nesto Loyalty System — PHP Backend Engineer Assignment
+# Nesto Loyalty System 
 
-An API-only backend implementation for a supermarket loyalty system designed for **Nesto Supermarkets, Sri Lanka**. 
-
-This system allows customers to register via cashiers, activate their profiles online, log in securely, earn loyalty points on eligible branch purchases, and track their point history via a customer dashboard.
-
----
-
-## 🛠️ Technology Stack
+## Technology Stack
 
 * **Framework:** Laravel 11 (API-only architecture)
 * **Language:** PHP 8.4
@@ -16,27 +10,8 @@ This system allows customers to register via cashiers, activate their profiles o
 * **DevOps/Containerization:** Docker Compose
 * **Database Visualizer:** phpMyAdmin 5
 
----
 
-## 🏗️ Architectural Design & SOLID Mapping
-
-This project was built to showcase clean, production-ready, object-oriented code without AI-style fluff or over-engineering:
-
-* **S — Single Responsibility (SRP):** Controllers deal purely with HTTP requests/responses, Form Requests handle validation, Services coordinate the domain business logic, and Repositories handle database interactions.
-* **O — Open/Closed (OCP):** New loyalty point calculators (e.g., promotional or tiered multipliers) can be introduced by creating a new strategy class implementing `PointsCalculatorInterface` and binding it in `AppServiceProvider`, leaving the core `OrderService` untouched.
-* **L — Liskov Substitution (LSP):** Any calculation strategy implements `PointsCalculatorInterface` guaranteeing it returns an integer and behaves identically to callers.
-* **I — Interface Segregation (ISP):** Scoped repository contracts (e.g., `CustomerRepositoryInterface`, `OrderRepositoryInterface`) ensure models only inherit operations they require.
-* **D — Dependency Inversion (DIP):** Service classes and Controllers depend on abstraction interfaces, which are bound to Eloquent implementations inside the Service Provider.
-
-### Design Patterns Used
-1. **Repository Pattern:** Separates persistence from core logic, simplifying testing and database swaps.
-2. **Strategy Pattern:** Utilized in `PointsCalculatorInterface` for flexible rules calculation.
-3. **Event-Listener Pattern:** Decouples order capture from points calculation. Creating an order dispatches `OrderCreated`, which is handled asynchronously by a queued listener.
-4. **Database Transaction Guard:** Protects data integrity in `AccountActivationService` to ensure a linked user account and customer profile status update succeed together or roll back entirely.
-
----
-
-## ⚡ Quick Start & Run (Docker Containerized)
+## Quick Start & Run (Docker Containerized)
 
 Ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
 
@@ -67,9 +42,9 @@ docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate:fresh --seed
 ```
 
----
 
-## 👤 Sample Dataset & Credentials (Seeded Automatically)
+
+## Sample Dataset & Credentials (Seeded Automatically)
 
 You can use the following pre-seeded user accounts for testing:
 
@@ -81,9 +56,9 @@ You can use the following pre-seeded user accounts for testing:
 | **Customer (Active)** | `kasun@gmail.com` | `password` | Brand new active customer |
 | **Customer (Pending)** | *(No login yet)* | *(Must activate)* | Registered under NIC `199806158521` (Mobile: `0719876543`) |
 
----
 
-## 🔍 Visualizing the Database (phpMyAdmin)
+
+## Visualizing the Database (phpMyAdmin)
 
 To inspect the MySQL database tables (`users`, `customers`, `branches`, `orders`, `loyalty_transactions`):
 1. Navigate to: **[http://localhost:8081](http://localhost:8081)**
@@ -92,9 +67,8 @@ To inspect the MySQL database tables (`users`, `customers`, `branches`, `orders`
    * **Username:** `nesto_user`
    * **Password:** `1234`
 
----
 
-## 🚀 API Endpoints Overview (V1)
+##  API Endpoints Overview (V1)
 
 All endpoints are versioned under `/api/v1`.
 
@@ -115,9 +89,9 @@ All endpoints are versioned under `/api/v1`.
 * `GET /api/v1/loyalty/transactions` - Protected. Paginated ledger of point transactions (earn, redeem, adjustment).
 * `GET /api/v1/loyalty/dashboard` - Protected. Returns points balance, 5 recent orders, and 5 recent point transactions.
 
----
 
-## 🧪 Running Tests
+
+##  Running Tests
 
 To run the automated PHPUnit test suite (which tests Sri Lankan format validations, duplicate order blocks, points threshold calculation, login gates, and security policies):
 
