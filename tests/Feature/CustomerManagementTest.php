@@ -213,4 +213,25 @@ class CustomerManagementTest extends TestCase
                 ]
             ]);
     }
+
+    /* Test Sri Lankan NIC and phone number inputs are sanitized and standardized */
+    public function test_customer_inputs_are_sanitized_and_normalized(): void
+    {
+        // 1. Post registration with spaced/dashed phone "+94 77-123 4567" and lowercase NIC with space "123456789 v"
+        $response = $this->actingAs($this->cashier)
+            ->postJson('/api/v1/customers', [
+                'nic_passport' => '123456789 v',
+                'mobile_number' => '+94 77-123 4567',
+                'name' => 'Sanitized User',
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('customer.nic_passport', '123456789V')
+            ->assertJsonPath('customer.mobile_number', '0771234567');
+
+        $this->assertDatabaseHas('customers', [
+            'nic_passport' => '123456789V',
+            'mobile_number' => '0771234567',
+        ]);
+    }
 }

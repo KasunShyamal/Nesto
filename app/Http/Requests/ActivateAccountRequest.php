@@ -12,6 +12,15 @@ class ActivateAccountRequest extends FormRequest
         return true;
     }
 
+    /* Sanitize and standardize NIC before validation */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('nic_passport')) {
+            $nic = strtoupper(str_replace([' ', '-'], '', $this->nic_passport));
+            $this->merge(['nic_passport' => $nic]);
+        }
+    }
+
    /* Get the validation rules that apply to the request*/
     public function rules(): array
     {

@@ -13,6 +13,23 @@ class RegisterCustomerRequest extends FormRequest
         return true;
     }
 
+    /* Sanitize and standardize NIC and Mobile formats before validation */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('nic_passport')) {
+            $nic = strtoupper(str_replace([' ', '-'], '', $this->nic_passport));
+            $this->merge(['nic_passport' => $nic]);
+        }
+
+        if ($this->has('mobile_number')) {
+            $mobile = str_replace([' ', '-', '+'], '', $this->mobile_number);
+            if (str_starts_with($mobile, '94')) {
+                $mobile = '0' . substr($mobile, 2);
+            }
+            $this->merge(['mobile_number' => $mobile]);
+        }
+    }
+
     /* Get the validation rules that apply to the request*/
     public function rules(): array
     {

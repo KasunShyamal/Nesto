@@ -12,6 +12,15 @@ class CreateOrderRequest extends FormRequest
         return true;
     }
 
+    /* Sanitize and standardize NIC/Passport before validation */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('nic_passport')) {
+            $nic = strtoupper(str_replace([' ', '-'], '', $this->nic_passport));
+            $this->merge(['nic_passport' => $nic]);
+        }
+    }
+
     /* Input validation rules */
     public function rules(): array
     {
