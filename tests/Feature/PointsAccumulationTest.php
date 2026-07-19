@@ -197,4 +197,27 @@ class PointsAccumulationTest extends TestCase
         $response2->assertStatus(201)
             ->assertJsonPath('order.invoice_number', 'INV-00002');
     }
+
+    /* Test CalculateLoyaltyPoints listener is idempotent and does not award points twice on retry */
+    public function test_points_listener_is_idempotent(): void
+    {
+        $order = \App\Models\Order::create([
+            'customer_id' => $this->customer->id,
+            'invoice_number' => 'INV-IDEMP',
+            'branch_id' => $this->branchColombo->id,
+            'transaction_date' => '2026-07-19',
+            'amount' => 15000.00,
+        ]);
+
+        $event = new \App\Events\OrderCreated($order);
+        $listener = resolve(\App\Listeners\CalculateLoyaltyPoints::class);
+
+        // Run handler first time
+        $listener->handle($event);
+        $this->assertEquals(1, \App\Models\LoyaltyTransaction::where('order_id', $order->id)->count());
+
+        // Run handler second time (simulating a queue retry)
+        $listener->handle($event);
+        $this->assertEquals(1, \App\Models\LoyaltyTransaction::where('order_id', $order->id)->count());
+    }
 }

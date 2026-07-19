@@ -27,6 +27,12 @@ class CalculateLoyaltyPoints implements ShouldQueue
     public function handle(OrderCreated $event): void
     {
         $order = $event->order;
+
+        // Idempotency guard: prevent duplicate point awards if queue jobs are retried
+        if ($this->transactionRepository->existsForOrder($order->id)) {
+            return;
+        }
+
         $points = $this->pointsCalculator->calculate($order);
 
         if ($points > 0) {

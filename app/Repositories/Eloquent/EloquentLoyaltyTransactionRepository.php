@@ -21,4 +21,10 @@ class EloquentLoyaltyTransactionRepository implements LoyaltyTransactionReposito
             ->latest()
             ->paginate($perPage);
     }
+
+    // check if a transaction exists for the given order id
+    public function existsForOrder(int $orderId): bool
+    {
+        return LoyaltyTransaction::where('order_id', $orderId)->exists();
+    }
 }
