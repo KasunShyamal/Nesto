@@ -6,17 +6,21 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+     /* Register application services.*/
     public function register(): void
     {
-        //
+
+        $this->app->bind(
+            \App\Contracts\Repositories\CustomerRepositoryInterface::class,
+            \App\Repositories\Eloquent\EloquentCustomerRepository::class
+        );
+
+        $this->app->bind(
+            \App\Contracts\Repositories\UserRepositoryInterface::class,
+            \App\Repositories\Eloquent\EloquentUserRepository::class
+        );
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         //

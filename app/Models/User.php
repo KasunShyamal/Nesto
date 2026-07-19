@@ -31,17 +31,14 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the customer profile associated with this user.
-     */
+    
+     /* Get the customer profile associated with this user.*/
     public function customer(): HasOne
     {
         return $this->hasOne(Customer::class);
     }
 
-    /**
-     * Helper methods to check roles
-     */
+    /* Helper methods to check roles*/
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
