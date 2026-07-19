@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\ActivationController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\OrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -17,6 +18,10 @@ Route::prefix('v1')->group(function () {
 
         // Customer registration
         Route::post('/customers', [CustomerController::class, 'register'])
+            ->middleware('role:cashier,admin');
+
+        // Order capture
+        Route::post('/orders', [OrderController::class, 'store'])
             ->middleware('role:cashier,admin');
 
         // Customer profile details

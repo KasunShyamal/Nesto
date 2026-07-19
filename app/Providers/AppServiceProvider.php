@@ -19,10 +19,33 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\Repositories\UserRepositoryInterface::class,
             \App\Repositories\Eloquent\EloquentUserRepository::class
         );
+
+        $this->app->bind(
+            \App\Contracts\Repositories\OrderRepositoryInterface::class,
+            \App\Repositories\Eloquent\EloquentOrderRepository::class
+        );
+
+        $this->app->bind(
+            \App\Contracts\Repositories\LoyaltyTransactionRepositoryInterface::class,
+            \App\Repositories\Eloquent\EloquentLoyaltyTransactionRepository::class
+        );
+
+        $this->app->bind(
+            \App\Contracts\Repositories\BranchRepositoryInterface::class,
+            \App\Repositories\Eloquent\EloquentBranchRepository::class
+        );
+
+        $this->app->bind(
+            \App\Contracts\Services\PointsCalculatorInterface::class,
+            \App\Services\Points\TieredPointsCalculator::class
+        );
     }
 
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\OrderCreated::class,
+            \App\Listeners\CalculateLoyaltyPoints::class
+        );
     }
 }
