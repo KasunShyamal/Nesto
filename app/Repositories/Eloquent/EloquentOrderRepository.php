@@ -20,4 +20,10 @@ class EloquentOrderRepository implements OrderRepositoryInterface
             ->where('branch_id', $branchId)
             ->first();
     }
+
+    // get all orders paginated, eager loading branch and customer
+    public function getPaginated(int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return Order::with(['branch', 'customer'])->latest()->paginate($perPage);
+    }
 }

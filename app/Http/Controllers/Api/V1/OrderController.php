@@ -13,10 +13,24 @@ use Illuminate\Http\Request;
 class OrderController extends Controller
 {
     protected OrderService $orderService;
+    protected \App\Contracts\Repositories\OrderRepositoryInterface $orderRepository;
 
-    public function __construct(OrderService $orderService)
-    {
+    public function __construct(
+        OrderService $orderService,
+        \App\Contracts\Repositories\OrderRepositoryInterface $orderRepository
+    ) {
         $this->orderService = $orderService;
+        $this->orderRepository = $orderRepository;
+    }
+
+    /* List all orders paginated (Cashier/Admin only) */
+    public function index(Request $request): JsonResponse
+    {
+        $orders = $this->orderRepository->getPaginated(15);
+
+        return response()->json([
+            'orders' => OrderResource::collection($orders)->response()->getData(true)
+        ]);
     }
 
     // capture a new customer purchase order (Cashier/Admin only)

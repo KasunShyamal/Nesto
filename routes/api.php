@@ -17,12 +17,16 @@ Route::prefix('v1')->group(function () {
         // User logout
         Route::post('/auth/logout', [AuthController::class, 'logout']);
 
-        // Customer registration
+        // Customer registration & listing
         Route::post('/customers', [CustomerController::class, 'register'])
             ->middleware('role:cashier,admin');
+        Route::get('/customers', [CustomerController::class, 'index'])
+            ->middleware('role:cashier,admin');
 
-        // Order capture
+        // Order capture & listing
         Route::post('/orders', [OrderController::class, 'store'])
+            ->middleware('role:cashier,admin');
+        Route::get('/orders', [OrderController::class, 'index'])
             ->middleware('role:cashier,admin');
 
         // Customer profile details

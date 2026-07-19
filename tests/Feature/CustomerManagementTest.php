@@ -187,4 +187,30 @@ class CustomerManagementTest extends TestCase
             ->assertJsonPath('customer.nic_passport', '199512345678')
             ->assertJsonPath('customer.status', 'active');
     }
+
+    /* Test cashier can retrieve all registered customers paginated */
+    public function test_cashier_can_retrieve_paginated_customers(): void
+    {
+        Customer::create([
+            'nic_passport' => '199512345678',
+            'mobile_number' => '0773456789',
+            'name' => 'John Doe',
+            'status' => 'active',
+            'registered_by' => $this->cashier->id,
+        ]);
+
+        $response = $this->actingAs($this->cashier)
+            ->getJson('/api/v1/customers');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'customers' => [
+                    'data' => [
+                        '*' => ['id', 'nic_passport', 'mobile_number', 'name', 'status']
+                    ],
+                    'links',
+                    'meta'
+                ]
+            ]);
+    }
 }

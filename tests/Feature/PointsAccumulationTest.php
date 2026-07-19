@@ -141,4 +141,30 @@ class PointsAccumulationTest extends TestCase
 
         $response->assertStatus(201);
     }
+
+    /* Test cashier can retrieve all captured orders paginated */
+    public function test_cashier_can_retrieve_paginated_orders(): void
+    {
+        \App\Models\Order::create([
+            'customer_id' => $this->customer->id,
+            'invoice_number' => 'INV-PAG',
+            'branch_id' => $this->branchColombo->id,
+            'transaction_date' => '2026-07-19',
+            'amount' => 5000.00,
+        ]);
+
+        $response = $this->actingAs($this->cashier)
+            ->getJson('/api/v1/orders');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'orders' => [
+                    'data' => [
+                        '*' => ['id', 'invoice_number', 'branch', 'amount', 'transaction_date']
+                    ],
+                    'links',
+                    'meta'
+                ]
+            ]);
+    }
 }

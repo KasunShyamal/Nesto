@@ -12,10 +12,24 @@ use Illuminate\Http\Request;
 class CustomerController extends Controller
 {
     protected CustomerRegistrationService $registrationService;
+    protected \App\Contracts\Repositories\CustomerRepositoryInterface $customerRepository;
 
-    public function __construct(CustomerRegistrationService $registrationService)
-    {
+    public function __construct(
+        CustomerRegistrationService $registrationService,
+        \App\Contracts\Repositories\CustomerRepositoryInterface $customerRepository
+    ) {
         $this->registrationService = $registrationService;
+        $this->customerRepository = $customerRepository;
+    }
+
+    /* List all registered customers paginated (Cashier/Admin only) */
+    public function index(Request $request): JsonResponse
+    {
+        $customers = $this->customerRepository->getPaginated(15);
+
+        return response()->json([
+            'customers' => CustomerResource::collection($customers)->response()->getData(true)
+        ]);
     }
 
     /* Register a new customer in the system*/

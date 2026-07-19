@@ -13,4 +13,6 @@ interface CustomerRepositoryInterface
     public function create(array $data): Customer;
 
     public function update(Customer $customer, array $data): bool;
+
+    public function getPaginated(int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator;
 }
