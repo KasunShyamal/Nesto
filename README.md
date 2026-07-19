@@ -1,58 +1,126 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Nesto Loyalty System — PHP Backend Engineer Assignment
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+An API-only backend implementation for a supermarket loyalty system designed for **Nesto Supermarkets, Sri Lanka**. 
 
-## About Laravel
+This system allows customers to register via cashiers, activate their profiles online, log in securely, earn loyalty points on eligible branch purchases, and track their point history via a customer dashboard.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠️ Technology Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+* **Framework:** Laravel 11 (API-only architecture)
+* **Language:** PHP 8.4
+* **Database:** MySQL 8.0 (ACID compliant primary storage)
+* **Caching & Queues:** Redis 7.0 (Queue driver for async point calculation)
+* **API Authentication:** Laravel Sanctum (Stateful tokens with role-based abilities)
+* **DevOps/Containerization:** Docker Compose
+* **Database Visualizer:** phpMyAdmin 5
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🏗️ Architectural Design & SOLID Mapping
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+This project was built to showcase clean, production-ready, object-oriented code without AI-style fluff or over-engineering:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+* **S — Single Responsibility (SRP):** Controllers deal purely with HTTP requests/responses, Form Requests handle validation, Services coordinate the domain business logic, and Repositories handle database interactions.
+* **O — Open/Closed (OCP):** New loyalty point calculators (e.g., promotional or tiered multipliers) can be introduced by creating a new strategy class implementing `PointsCalculatorInterface` and binding it in `AppServiceProvider`, leaving the core `OrderService` untouched.
+* **L — Liskov Substitution (LSP):** Any calculation strategy implements `PointsCalculatorInterface` guaranteeing it returns an integer and behaves identically to callers.
+* **I — Interface Segregation (ISP):** Scoped repository contracts (e.g., `CustomerRepositoryInterface`, `OrderRepositoryInterface`) ensure models only inherit operations they require.
+* **D — Dependency Inversion (DIP):** Service classes and Controllers depend on abstraction interfaces, which are bound to Eloquent implementations inside the Service Provider.
 
-## Agentic Development
+### Design Patterns Used
+1. **Repository Pattern:** Separates persistence from core logic, simplifying testing and database swaps.
+2. **Strategy Pattern:** Utilized in `PointsCalculatorInterface` for flexible rules calculation.
+3. **Event-Listener Pattern:** Decouples order capture from points calculation. Creating an order dispatches `OrderCreated`, which is handled asynchronously by a queued listener.
+4. **Database Transaction Guard:** Protects data integrity in `AccountActivationService` to ensure a linked user account and customer profile status update succeed together or roll back entirely.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
 
+## ⚡ Quick Start & Run (Docker Containerized)
+
+Ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
+
+### Windows (One-Click Setup)
+Double-click on the **`start.bat`** script in the project root. This automates:
+1. Copying `.env.example` to `.env`
+2. Starting Docker containers (`app`, `webserver`, `mysql`, `redis`, `queue-worker`, `phpmyadmin`)
+3. Installing Composer dependencies inside the container
+4. Generating the Laravel app security key
+5. Running database migrations and seeders
+
+### Manual Run (Any OS)
+If you prefer to run commands manually:
 ```bash
-composer require laravel/boost --dev
+# 1. Copy environment template
+cp .env.example .env
 
-php artisan boost:install
+# 2. Build and start containers
+docker compose up -d --build
+
+# 3. Install composer packages inside the container
+docker compose exec app composer install
+
+# 4. Generate app security key
+docker compose exec app php artisan key:generate
+
+# 5. Run migrations and database seeders
+docker compose exec app php artisan migrate:fresh --seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## 👤 Sample Dataset & Credentials (Seeded Automatically)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+You can use the following pre-seeded user accounts for testing:
 
-## Code of Conduct
+| Role | Email | Password | Details |
+|---|---|---|---|
+| **Admin** | `admin@nesto.lk` | `password` | Admin management |
+| **Cashier** | `cashier01@nesto.lk` | `password` | Registers customers & captures purchases |
+| **Customer (Active)** | `dilshan@gmail.com` | `password` | Has 2 pre-seeded orders (395 total points) |
+| **Customer (Active)** | `kasun@gmail.com` | `password` | Brand new active customer |
+| **Customer (Pending)** | *(No login yet)* | *(Must activate)* | Registered under NIC `199806158521` (Mobile: `0719876543`) |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 🔍 Visualizing the Database (phpMyAdmin)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+To inspect the MySQL database tables (`users`, `customers`, `branches`, `orders`, `loyalty_transactions`):
+1. Navigate to: **[http://localhost:8081](http://localhost:8081)**
+2. Input credentials:
+   * **Server:** `mysql`
+   * **Username:** `nesto_user`
+   * **Password:** `1234`
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🚀 API Endpoints Overview (V1)
+
+All endpoints are versioned under `/api/v1`.
+
+### 1. Authentication
+* `POST /api/v1/auth/login` - Public. Logs in using email & password. Returns a Sanctum bearer token.
+* `POST /api/v1/auth/logout` - Protected. Revokes the current API token.
+
+### 2. Customer Management
+* `POST /api/v1/customers` - Protected (Cashier/Admin). Cashier registers customer (name, mobile, NIC/Passport).
+* `POST /api/v1/customers/activate` - Public. Customer activates account by matching NIC/Passport, providing login email, and setting a password.
+* `GET /api/v1/customers/me` - Protected (Customer). Customer retrieves their own profile details.
+
+### 3. Points Accumulation
+* `POST /api/v1/orders` - Protected (Cashier/Admin). Captures order data. Automatically triggers async points calculation if amount is ≥ 10,000 LKR (1 point per 100 LKR).
+
+### 4. Tracking Loyalty Points (Customer only)
+* `GET /api/v1/loyalty/balance` - Protected. Returns current points balance.
+* `GET /api/v1/loyalty/transactions` - Protected. Paginated ledger of point transactions (earn, redeem, adjustment).
+* `GET /api/v1/loyalty/dashboard` - Protected. Returns points balance, 5 recent orders, and 5 recent point transactions.
+
+---
+
+## 🧪 Running Tests
+
+To run the automated PHPUnit test suite (which tests Sri Lankan format validations, duplicate order blocks, points threshold calculation, login gates, and security policies):
+
+```bash
+docker compose exec app php artisan test
+```

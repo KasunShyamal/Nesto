@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\ActivationController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\OrderController;
+use App\Http\Controllers\Api\V1\LoyaltyDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -26,6 +27,16 @@ Route::prefix('v1')->group(function () {
 
         // Customer profile details
         Route::get('/customers/me', [CustomerController::class, 'me'])
+            ->middleware('role:customer');
+
+        // Loyalty details & tracking
+        Route::get('/loyalty/balance', [LoyaltyDashboardController::class, 'balance'])
+            ->middleware('role:customer');
+
+        Route::get('/loyalty/transactions', [LoyaltyDashboardController::class, 'transactions'])
+            ->middleware('role:customer');
+
+        Route::get('/loyalty/dashboard', [LoyaltyDashboardController::class, 'dashboard'])
             ->middleware('role:customer');
     });
 });
