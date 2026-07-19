@@ -152,4 +152,40 @@ class LoyaltyDashboardTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    /* Test that customer balance is cached in Redis and correctly invalidated on new transactions */
+    public function test_customer_balance_is_cached_and_invalidated(): void
+    {
+        $cacheKey = "customer:{$this->customer->id}:points_balance";
+
+        // 1. Initial access: balance should be 0, cached value should be set
+        $this->assertEquals(0, $this->customer->points_balance);
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::has($cacheKey));
+        $this->assertEquals(0, \Illuminate\Support\Facades\Cache::get($cacheKey));
+
+        // 2. Add an order and transaction
+        $order = Order::create([
+            'customer_id' => $this->customer->id,
+            'invoice_number' => 'INV-CACHE-TEST',
+            'branch_id' => $this->branch->id,
+            'transaction_date' => '2026-07-19',
+            'amount' => 12000.00,
+        ]);
+
+        LoyaltyTransaction::create([
+            'customer_id' => $this->customer->id,
+            'order_id' => $order->id,
+            'points' => 120,
+            'type' => 'earn',
+            'description' => 'Earned points',
+        ]);
+
+        // 3. Cache should have been automatically invalidated by model observers
+        $this->assertFalse(\Illuminate\Support\Facades\Cache::has($cacheKey));
+
+        // 4. Access points_balance again: should compute new value 120 and re-cache it
+        $this->assertEquals(120, $this->customer->points_balance);
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::has($cacheKey));
+        $this->assertEquals(120, \Illuminate\Support\Facades\Cache::get($cacheKey));
+    }
 }

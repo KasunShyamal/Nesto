@@ -46,10 +46,14 @@ class Customer extends Model
     }
 
     /**
-     * Calculate current total points balance.
+     * Calculate current total points balance (cached in Redis).
      */
     public function getPointsBalanceAttribute(): int
     {
-        return $this->loyaltyTransactions()->sum('points');
+        $cacheKey = "customer:{$this->id}:points_balance";
+
+        return (int) \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () {
+            return $this->loyaltyTransactions()->sum('points');
+        });
     }
 }

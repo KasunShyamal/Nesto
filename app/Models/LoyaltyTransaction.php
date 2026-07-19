@@ -27,4 +27,16 @@ class LoyaltyTransaction extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    /* Auto-invalidate customer balance cache when transactions change */
+    protected static function booted(): void
+    {
+        $clearCache = function (LoyaltyTransaction $transaction) {
+            \Illuminate\Support\Facades\Cache::forget("customer:{$transaction->customer_id}:points_balance");
+        };
+
+        static::created($clearCache);
+        static::updated($clearCache);
+        static::deleted($clearCache);
+    }
 }
