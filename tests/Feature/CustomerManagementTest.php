@@ -234,4 +234,22 @@ class CustomerManagementTest extends TestCase
             'mobile_number' => '0771234567',
         ]);
     }
+
+    /* Test that the login endpoint is rate limited to attacks */
+    public function test_login_endpoint_has_rate_limiting(): void
+    {
+        // Execute 5 rapid requests
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/v1/auth/login', [
+                'email' => 'cashier01@nesto.lk',
+                'password' => 'wrongpassword',
+            ])->assertStatus(422); 
+        }
+
+        // The 6th request should hit the rate limiter and return 429
+        $this->postJson('/api/v1/auth/login', [
+            'email' => 'cashier01@nesto.lk',
+            'password' => 'wrongpassword',
+        ])->assertStatus(429);
+    }
 }

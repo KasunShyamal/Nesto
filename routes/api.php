@@ -8,9 +8,11 @@ use App\Http\Controllers\Api\V1\LoyaltyDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    // Public Authentication & Activation routes
-    Route::post('/auth/login', [AuthController::class, 'login']);
-    Route::post('/customers/activate', [ActivationController::class, 'activate']);
+    // Public Authentication & Activation routes (Rate limited to 5 requests per minute)
+    Route::post('/auth/login', [AuthController::class, 'login'])
+        ->middleware('throttle:5,1');
+    Route::post('/customers/activate', [ActivationController::class, 'activate'])
+        ->middleware('throttle:5,1');
 
     // Authenticated routes
     Route::middleware('auth:sanctum')->group(function () {
