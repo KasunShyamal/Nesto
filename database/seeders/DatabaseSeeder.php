@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $cashier = User::create([
-            'name' => 'Nesto Cashier 01',
+            'name' => 'Cashier 01',
             'email' => 'cashier01@nesto.lk',
             'password' => Hash::make('password'),
             'role' => 'cashier',

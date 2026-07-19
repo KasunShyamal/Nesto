@@ -44,26 +44,50 @@ class OrderService
             ]);
         }
 
-        // 3. Double-check duplicate submissions (invoice number + branch constraint)
-        $existingOrder = $this->orderRepository->findByInvoiceAndBranch($data['invoice_number'], $branch->id);
+        // 3. Resolve or generate invoice number
+        $invoiceNumber = $data['invoice_number'] ?? $this->generateInvoiceNumber();
+
+        // 4. Double-check duplicate submissions (invoice number + branch constraint)
+        $existingOrder = $this->orderRepository->findByInvoiceAndBranch($invoiceNumber, $branch->id);
         if ($existingOrder) {
             throw ValidationException::withMessages([
                 'invoice_number' => ['An order with this invoice number has already been recorded for this branch.'],
             ]);
         }
 
-        // 4. Persist order
+        // 5. Persist order
         $order = $this->orderRepository->create([
             'customer_id' => $customer->id,
-            'invoice_number' => $data['invoice_number'],
+            'invoice_number' => $invoiceNumber,
             'branch_id' => $branch->id,
             'transaction_date' => $data['transaction_date'],
             'amount' => $data['amount'],
         ]);
 
-        // 5. Fire event for async points calculation
+        // 6. Fire event for async points calculation
         OrderCreated::dispatch($order);
 
         return $order;
+    }
+
+    // generate next sequential invoice number based on prefix from env
+    private function generateInvoiceNumber(): string
+    {
+        $prefix = env('INVOICE_PREFIX', 'INV');
+
+        // Find the latest order in the system with this prefix
+        $latestOrder = Order::where('invoice_number', 'like', $prefix . '-%')
+            ->latest('id')
+            ->first();
+
+        if (!$latestOrder) {
+            return $prefix . '-00001';
+        }
+
+        // Extract numeric suffix and increment
+        $lastNumber = (int) str_replace($prefix . '-', '', $latestOrder->invoice_number);
+        $nextNumber = $lastNumber + 1;
+
+        return $prefix . '-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
     }
 }

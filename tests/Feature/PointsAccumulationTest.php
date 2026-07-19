@@ -87,6 +87,9 @@ class PointsAccumulationTest extends TestCase
             'points' => 155,
             'type' => 'earn',
         ]);
+
+        // Ensure exactly one transaction was recorded
+        $this->assertEquals(1, LoyaltyTransaction::count());
     }
 
     /* Test duplicate invoice is blocked within the same branch */
@@ -166,5 +169,32 @@ class PointsAccumulationTest extends TestCase
                     'meta'
                 ]
             ]);
+    }
+
+    /* Test order capture auto-generates invoice number sequentially if not supplied */
+    public function test_order_can_auto_generate_invoice_number(): void
+    {
+        $response = $this->actingAs($this->cashier)
+            ->postJson('/api/v1/orders', [
+                'nic_passport' => '199512345678',
+                'branch_code' => 'COL01',
+                'transaction_date' => '2026-07-19',
+                'amount' => 12000.00,
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('order.invoice_number', 'INV-00001');
+
+        // Post second order without invoice number, should be INV-00002
+        $response2 = $this->actingAs($this->cashier)
+            ->postJson('/api/v1/orders', [
+                'nic_passport' => '199512345678',
+                'branch_code' => 'COL01',
+                'transaction_date' => '2026-07-19',
+                'amount' => 15000.00,
+            ]);
+
+        $response2->assertStatus(201)
+            ->assertJsonPath('order.invoice_number', 'INV-00002');
     }
 }

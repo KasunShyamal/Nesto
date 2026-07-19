@@ -17,7 +17,7 @@ class CreateOrderRequest extends FormRequest
     {
         return [
             'nic_passport' => 'required|string|exists:customers,nic_passport',
-            'invoice_number' => 'required|string|max:50',
+            'invoice_number' => 'nullable|string|max:50',
             'branch_code' => 'required|string|exists:branches,code',
             'transaction_date' => 'required|date_format:Y-m-d|before_or_equal:today',
             'amount' => 'required|numeric|min:0',
